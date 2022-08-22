@@ -5,28 +5,28 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-// ·â×°Ïß³ÌÍ¬²½»úÖÆÀà£¬ĞÅºÅÁ¿Àà£¬»¥³âËøÀà£¬Ìõ¼ş±äÁ¿Àà
+// å°è£…çº¿ç¨‹åŒæ­¥æœºåˆ¶ç±»ï¼Œä¿¡å·é‡ç±»ï¼Œäº’æ–¥é”ç±»ï¼Œæ¡ä»¶å˜é‡ç±»
 
-// ĞÅºÅÁ¿Àà
+// ä¿¡å·é‡ç±»
 class sem {
 public:
-    // init,´´½¨²¢³õÊ¼»¯ĞÅºÅÁ¿
+    // init,åˆ›å»ºå¹¶åˆå§‹åŒ–ä¿¡å·é‡
     sem() {
-        // µÚ¶ş¸ö²ÎÊıÎª0£¬±íÕâ¸öĞÅºÅÁ¿ÊÇµ±Ç°½ø³ÌµÄ¾Ö²¿ĞÅºÅÁ¿£¬²»¿ÉÔÚ¶à¸ö½ø³Ì¼ä¹²Ïí
+        // ç¬¬äºŒä¸ªå‚æ•°ä¸º0ï¼Œè¡¨è¿™ä¸ªä¿¡å·é‡æ˜¯å½“å‰è¿›ç¨‹çš„å±€éƒ¨ä¿¡å·é‡ï¼Œä¸å¯åœ¨å¤šä¸ªè¿›ç¨‹é—´å…±äº«
         if (sem_init(&m_sem, 0, 0)!=0) {    
-            // ¹¹Ôìº¯ÊıÎŞ·µ»ØÖµ£¬Í¨¹ıÅ×³öÒì³£À´±¨¿¼´íÎó
+            // æ„é€ å‡½æ•°æ— è¿”å›å€¼ï¼Œé€šè¿‡æŠ›å‡ºå¼‚å¸¸æ¥æŠ¥è€ƒé”™è¯¯
             throw std::exception();
         }
     }
-    // Ïú»ÙĞÅºÅÁ¿
+    // é”€æ¯ä¿¡å·é‡
     ~sem() {
         sem_destroy(&m_sem);
     }
-    // µÈ´ıĞÅºÅÁ¿
+    // ç­‰å¾…ä¿¡å·é‡
     bool wait() {
         return sem_wait(&m_sem) == 0;
     }
-    // Ôö¼ÓĞÅºÅÁ¿
+    // å¢åŠ ä¿¡å·é‡
     bool post() {
         return sem_post(&m_sem) == 0;
     }
@@ -35,24 +35,24 @@ private:
     sem_t m_sem;
 };
 
-// »¥³âËøÀà
+// äº’æ–¥é”ç±»
 class locker {
 public:
-    // ´´½¨²¢³õÊ¼»¯»¥³âËø
+    // åˆ›å»ºå¹¶åˆå§‹åŒ–äº’æ–¥é”
     locker() {
         if (pthread_mutex_init(&m_mutex, nullptr) != 0) {
             throw std::exception();
         }
     }
-    // Ïú»Ù»¥³âËø
+    // é”€æ¯äº’æ–¥é”
     ~locker() {
         pthread_mutex_destroy(&m_mutex);
     }
-    // »ñÈ¡»¥³âËø
+    // è·å–äº’æ–¥é”
     bool lock() {
         return pthread_mutex_lock(&m_mutex) == 0;
     }
-    // ÊÍ·Å»¥³âËø
+    // é‡Šæ”¾äº’æ–¥é”
     bool unlock() {
         return pthread_mutex_unlock(&m_mutex) == 0;
     }
@@ -61,34 +61,31 @@ private:
     pthread_mutex_t m_mutex;
 };
 
-// Ìõ¼ş±äÁ¿Àà
+// æ¡ä»¶å˜é‡ç±»
 class cond {
 public:
-    // ´´½¨²¢³õÊ¼»¯Ìõ¼ş±äÁ¿
+    // åˆ›å»ºå¹¶åˆå§‹åŒ–æ¡ä»¶å˜é‡
     cond() {
-        if (pthread_mutex_init(&m_mutex, nullptr) != 0) {
-            throw std::exception();
-        }
         if (pthread_cond_init(&m_cond, nullptr) != 0) {
-            // ¹¹Ôìº¯ÊıÒ»µ©³öÎÊÌâ£¬¾ÍÓ¦¸ÃÁ¢¼´ÊÍ·ÅÒÑ¾­³É¹¦·ÖÅäÁËµÄ×ÊÔ´
+            // æ„é€ å‡½æ•°ä¸€æ—¦å‡ºé—®é¢˜ï¼Œå°±åº”è¯¥ç«‹å³é‡Šæ”¾å·²ç»æˆåŠŸåˆ†é…äº†çš„èµ„æº
             pthread_mutex_destroy(&m_mutex);
             throw std::exception();
         }
     }
-    // Ïú»ÙÌõ¼ş±äÁ¿
+    // é”€æ¯æ¡ä»¶å˜é‡
     ~cond() {
         pthread_mutex_destroy(&m_mutex);
         pthread_cond_destroy(&m_cond);
     }
-    // µÈ´ıÌõ¼ş±äÁ¿
+    // ç­‰å¾…æ¡ä»¶å˜é‡
     bool wait() {
         int ret = 0;
-        pthread_mutex_lock(&m_mutex);   // waitÇ°£¬ĞèÒªÏÈÉÏËø
-        ret = pthread_cond_wait(&m_cond, &m_mutex); //³É¹¦·µ»Ø0
-        pthread_mutex_unlock(&m_mutex);  // ½âËø
+        pthread_mutex_lock(&m_mutex);   // waitå‰ï¼Œéœ€è¦å…ˆä¸Šé”
+        ret = pthread_cond_wait(&m_cond, &m_mutex); //æˆåŠŸè¿”å›0
+        pthread_mutex_unlock(&m_mutex);  // è§£é”
         return ret == 0;        
     }
-    // »½ĞÑµÈ´ıÌõ¼ş±äÁ¿µÄÏß³Ì
+    // å”¤é†’ç­‰å¾…æ¡ä»¶å˜é‡çš„çº¿ç¨‹
     bool signal() {
         return pthread_cond_signal(&m_cond) == 0;
     }
